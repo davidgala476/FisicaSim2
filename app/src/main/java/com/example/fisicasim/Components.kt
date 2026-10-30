@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -103,4 +104,31 @@ fun ProgressBar(fraction: Float, color: Color = Teal) {
 @Composable
 fun SectionTitle(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium, color = Ink)
+}
+
+@Composable
+fun InfoSectionCard(title: String, text: String) {
+    AppCard {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = TealDark)
+            Text(text, fontSize = 14.sp, color = Ink, lineHeight = 20.sp)
+        }
+    }
+}
+
+@Composable
+fun FormulasCard(formulas: List<String>) {
+    AppCard {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionTitle("Fórmulas")
+            formulas.forEach { f ->
+                Box(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(AppBg)
+                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                ) {
+                    Text(f, fontFamily = FontFamily.Monospace, fontSize = 13.sp, color = Ink, lineHeight = 19.sp)
+                }
+            }
+        }
+    }
 }

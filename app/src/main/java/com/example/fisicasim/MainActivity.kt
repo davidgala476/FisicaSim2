@@ -46,27 +46,31 @@ private val topicIcons = listOf("⚖️", "✏️", "📐", "🪢", "🌀", "〰
 fun App() {
     var tab by rememberSaveable { mutableStateOf(0) }
     var selected by rememberSaveable { mutableStateOf<Int?>(null) }
+    var topic by rememberSaveable { mutableStateOf<Int?>(null) }
     var visited by rememberSaveable { mutableStateOf(listOf<Int>()) }
 
-    BackHandler(enabled = selected != null) { selected = null }
+    val inDetail = if (tab == 0) selected != null else topic != null
+    BackHandler(enabled = inDetail) { if (tab == 0) selected = null else topic = null }
 
     Box(Modifier.fillMaxSize().background(AppBg)) {
         Decorations()
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
-            AppHeader(showBack = selected != null && tab == 0, onBack = { selected = null })
-            if (selected == null || tab == 1) {
+            AppHeader(showBack = inDetail, onBack = { if (tab == 0) selected = null else topic = null })
+            if (!inDetail) {
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    TabChip("Simulador", tab == 0) { tab = 0; selected = null }
-                    TabChip("Teoría", tab == 1) { tab = 1; selected = null }
+                    TabChip("Simulador", tab == 0) { tab = 0; selected = null; topic = null }
+                    TabChip("Teoría", tab == 1) { tab = 1; selected = null; topic = null }
                 }
                 Spacer(Modifier.height(6.dp))
             }
             val sel = selected
+            val tp = topic
             when {
-                tab == 1 -> TheoryList()
+                tab == 1 && tp == null -> TheoryList { topic = it }
+                tab == 1 && tp != null -> TopicScreen(tp)
                 sel == null -> ExerciseList(visited) { i ->
                     if (i !in visited) visited = visited + i
                     selected = i
@@ -129,23 +133,14 @@ fun ExerciseList(visited: List<Int>, onPick: (Int) -> Unit) {
             val m = metas[i]
             val accent = accentFor(i)
             AppCard(onClick = { onPick(i) }) {
-                Column(Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconBubble(m.icon, accent)
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(ex.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink, maxLines = 2)
-                            Text(m.tag, color = accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        TagPill(if (i in visited) "Visto" else "Nuevo", if (i in visited) Muted else Teal)
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Text(ex.statement, fontSize = 13.sp, color = Muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                    Spacer(Modifier.height(12.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        PillButton("Simular  →", { onPick(i) })
-                    }
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconBubble(m.icon, accent)
+                    Spacer(Modifier.width(12.dp))
+                    Text(ex.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink, modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
+                    if (i in visited) TagPill("Visto", Muted)
+                    Spacer(Modifier.width(6.dp))
+                    Text("›", fontSize = 26.sp, color = Teal)
                 }
             }
         }
@@ -157,6 +152,7 @@ fun ExerciseScreen(idx: Int) {
     val ex = exercises[idx]
     val meta = metas[idx]
     val accent = accentFor(idx)
+    val info = exerciseInfos.getOrNull(idx)
     val values = remember(idx) {
         mutableStateMapOf<String, String>().apply { ex.params.forEach { put(it.key, it.default.toString()) } }
     }
@@ -196,8 +192,12 @@ fun ExerciseScreen(idx: Int) {
                         Text(meta.tag, color = accent, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
-                Spacer(Modifier.height(10.dp))
-                Text(ex.statement, fontSize = 13.sp, color = Muted)
+                if (info != null) {
+                    Spacer(Modifier.height(12.dp))
+                    Text("¿Qué es?", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TealDark)
+                    Spacer(Modifier.height(2.dp))
+                    Text(info.description, fontSize = 14.sp, color = Ink, lineHeight = 20.sp)
+                }
             }
         }
 
@@ -281,12 +281,16 @@ fun ExerciseScreen(idx: Int) {
                 }
             }
         }
+
+        // Enunciado, apartados y fórmulas
+        InfoSectionCard("Enunciado", ex.statement)
+        info?.sections?.forEach { InfoSectionCard(it.title, it.text) }
+        if (info != null && info.formulas.isNotEmpty()) FormulasCard(info.formulas)
     }
 }
 
 @Composable
-fun TheoryList() {
-    var open by remember { mutableStateOf<Topic?>(null) }
+fun TheoryList(onOpen: (Int) -> Unit) {
     LazyColumn(
         contentPadding = PaddingValues(20.dp, 8.dp, 20.dp, 32.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -294,41 +298,44 @@ fun TheoryList() {
         item {
             Column {
                 Text("Temas y fórmulas", style = MaterialTheme.typography.headlineSmall, color = Ink)
-                Text("Toca una tarjeta para ver el detalle.", fontSize = 13.sp, color = Muted)
+                Text("Elige un tema para ver su explicación.", fontSize = 13.sp, color = Muted)
             }
         }
         itemsIndexed(topics) { i, tp ->
-            val accent = accentFor(i)
-            AppCard(onClick = { open = tp }) {
-                Column(Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconBubble(topicIcons.getOrElse(i) { "📘" }, accent)
-                        Spacer(Modifier.width(12.dp))
-                        Text(tp.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink, modifier = Modifier.weight(1f))
-                        Spacer(Modifier.width(8.dp))
-                        TagPill("Tema ${i + 1}", accent)
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        tp.body.replace("\n", " "),
-                        fontSize = 13.sp, color = Muted, maxLines = 2, overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        PillButton("Leer  →", { open = tp })
-                    }
+            AppCard(onClick = { onOpen(i) }) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconBubble(topicIcons.getOrElse(i) { "📘" }, accentFor(i))
+                    Spacer(Modifier.width(12.dp))
+                    Text(tp.title, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink, modifier = Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
+                    Text("›", fontSize = 26.sp, color = Teal)
                 }
             }
         }
     }
-    open?.let { tp ->
-        AlertDialog(
-            onDismissRequest = { open = null },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(28.dp),
-            confirmButton = { PillButton("Cerrar", { open = null }) },
-            title = { Text(tp.title, fontWeight = FontWeight.Bold, color = Ink) },
-            text = { Column(Modifier.verticalScroll(rememberScrollState())) { Text(tp.body, fontSize = 14.sp, color = Ink) } }
-        )
+}
+
+@Composable
+fun TopicScreen(idx: Int) {
+    val tp = topics[idx]
+    Column(
+        Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 4.dp, bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        AppCard {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconBubble(topicIcons.getOrElse(idx) { "📘" }, accentFor(idx))
+                    Spacer(Modifier.width(12.dp))
+                    Text(tp.title, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = Ink, modifier = Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(12.dp))
+                Text("¿Qué es?", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TealDark)
+                Spacer(Modifier.height(2.dp))
+                Text(tp.description, fontSize = 14.sp, color = Ink, lineHeight = 20.sp)
+            }
+        }
+        tp.sections.forEach { InfoSectionCard(it.title, it.text) }
+        if (tp.formulas.isNotEmpty()) FormulasCard(tp.formulas)
     }
 }
