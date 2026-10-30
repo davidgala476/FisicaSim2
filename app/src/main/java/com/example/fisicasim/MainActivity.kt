@@ -9,6 +9,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -47,35 +48,57 @@ fun App() {
     var tab by rememberSaveable { mutableStateOf(0) }
     var selected by rememberSaveable { mutableStateOf<Int?>(null) }
     var topic by rememberSaveable { mutableStateOf<Int?>(null) }
+    var workshop by rememberSaveable { mutableStateOf<Int?>(null) }
+    var pdfAsset by rememberSaveable { mutableStateOf<String?>(null) }
     var visited by rememberSaveable { mutableStateOf(listOf<Int>()) }
 
-    val inDetail = if (tab == 0) selected != null else topic != null
-    BackHandler(enabled = inDetail) { if (tab == 0) selected = null else topic = null }
+    val viewing = pdfAsset != null
+    val inDetail = when (tab) {
+        0 -> selected != null
+        1 -> topic != null
+        else -> workshop != null
+    }
+    fun goBack() {
+        when {
+            pdfAsset != null -> pdfAsset = null
+            tab == 0 -> selected = null
+            tab == 1 -> topic = null
+            else -> workshop = null
+        }
+    }
+    BackHandler(enabled = viewing || inDetail) { goBack() }
 
     Box(Modifier.fillMaxSize().background(AppBg)) {
         Decorations()
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
-            AppHeader(showBack = inDetail, onBack = { if (tab == 0) selected = null else topic = null })
-            if (!inDetail) {
+            AppHeader(showBack = viewing || inDetail, onBack = { goBack() })
+            if (!viewing && !inDetail) {
                 Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp),
+                    Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    TabChip("Simulador", tab == 0) { tab = 0; selected = null; topic = null }
-                    TabChip("Teoría", tab == 1) { tab = 1; selected = null; topic = null }
+                    TabChip("Simulador", tab == 0) { tab = 0; selected = null; topic = null; workshop = null }
+                    TabChip("Teoría", tab == 1) { tab = 1; selected = null; topic = null; workshop = null }
+                    TabChip("Taller", tab == 2) { tab = 2; selected = null; topic = null; workshop = null }
                 }
                 Spacer(Modifier.height(6.dp))
             }
             val sel = selected
             val tp = topic
+            val ws = workshop
+            val pdf = pdfAsset?.let { a -> allPdfs().firstOrNull { it.asset == a } }
             when {
-                tab == 1 && tp == null -> TheoryList { topic = it }
-                tab == 1 && tp != null -> TopicScreen(tp)
-                sel == null -> ExerciseList(visited) { i ->
+                pdf != null -> PdfViewerScreen(pdf)
+                tab == 0 && sel == null -> ExerciseList(visited) { i ->
                     if (i !in visited) visited = visited + i
                     selected = i
                 }
-                else -> ExerciseScreen(sel)
+                tab == 0 && sel != null -> ExerciseScreen(sel)
+                tab == 1 && tp == null -> TheoryList { topic = it }
+                tab == 1 && tp != null -> TopicScreen(tp) { pdfAsset = it.asset }
+                tab == 2 && ws == null -> WorkshopList { workshop = it }
+                tab == 2 && ws != null -> WorkshopScreen(ws) { pdfAsset = it.asset }
             }
         }
     }
@@ -316,7 +339,7 @@ fun TheoryList(onOpen: (Int) -> Unit) {
 }
 
 @Composable
-fun TopicScreen(idx: Int) {
+fun TopicScreen(idx: Int, onView: (PdfFile) -> Unit) {
     val tp = topics[idx]
     Column(
         Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 4.dp, bottom = 32.dp),
@@ -338,5 +361,6 @@ fun TopicScreen(idx: Int) {
         tp.videoId?.let { VideoCard(it) }
         tp.sections.forEach { InfoSectionCard(it.title, it.text) }
         if (tp.formulas.isNotEmpty()) FormulasCard(tp.formulas)
+        if (tp.pdfs.isNotEmpty()) MaterialCard(tp.pdfs, onView)
     }
 }

@@ -5,7 +5,8 @@ data class Topic(
     val description: String,
     val sections: List<InfoSection>,
     val formulas: List<String>,
-    val videoId: String? = null
+    val videoId: String? = null,
+    val pdfs: List<PdfFile> = emptyList()
 )
 
 val topics = listOf(
@@ -62,7 +63,8 @@ val topics = listOf(
             "F = M(g + a) / n",
             "d = n·h     a del cabo = n·a",
             "Con eficiencia: F = M·g / (η·n)"
-        )
+        ),
+        pdfs = listOf(Pdfs.polipastos)
     ),
     Topic(
         "Ley de Hooke",
@@ -79,7 +81,8 @@ val topics = listOf(
             "Paralelo: keq = k1 + k2",
             "Masa colgada: x = m·g / k",
             "Ascensor: F = m(g + a)"
-        )
+        ),
+        pdfs = listOf(Pdfs.oscilatorio)
     ),
     Topic(
         "Movimiento armónico simple",
@@ -95,7 +98,8 @@ val topics = listOf(
             "ω = √(k/m)     T = 2π/ω     f = 1/T",
             "v máx = A·ω     a máx = A·ω²",
             "Péndulo: T = 2π√(L/g)"
-        )
+        ),
+        pdfs = listOf(Pdfs.oscilatorio)
     ),
     Topic(
         "Cinemática",
@@ -111,7 +115,8 @@ val topics = listOf(
             "Δx = v0·t + ½·a·t²",
             "v² = v0² + 2a·Δx",
             "Δx = ½(v0 + v)·t"
-        )
+        ),
+        pdfs = listOf(Pdfs.cinematica)
     ),
     Topic(
         "Trabajo y energía",
