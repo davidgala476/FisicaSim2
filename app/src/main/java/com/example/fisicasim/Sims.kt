@@ -11,7 +11,6 @@ import kotlin.math.*
 
 typealias SimFn = DrawScope.(Map<String, Double>, Float) -> Unit
 
-/** Metadatos visuales de cada ejercicio (mismo orden que la lista `exercises`). */
 data class Meta(val icon: String, val tag: String, val color: Color, val legend: String, val sim: SimFn)
 
 private val INK = Color(0xFF37474F)
@@ -21,7 +20,6 @@ private val GREEN = Color(0xFF43A047)
 private val RED = Color(0xFFE53935)
 private val GREY = Color(0xFFB0BEC5)
 
-// ---------- utilidades de dibujo ----------
 private fun DrawScope.ln(a: Offset, b: Offset, c: Color = INK, w: Float = 4f) = drawLine(c, a, b, w)
 
 private fun DrawScope.box(bc: Offset, w: Float, h: Float, col: Color) {
@@ -80,10 +78,8 @@ private fun DrawScope.onSlope(s: Slope, d: Float, w: Float, col: Color) {
     }
 }
 
-// ---------- simulaciones (mismo orden que `exercises`) ----------
 val metas: List<Meta> = listOf(
 
-    // 0 · Atwood
     Meta("⚖️", "Poleas", BLUE, "Azul = m1 · Naranja = m2. La masa mayor desciende con a = (m2−m1)g/(m1+m2).") { p, t ->
         val m1 = p["m1"]!!; val m2 = p["m2"]!!
         val a = abs(m2 - m1) * G / (m1 + m2)
@@ -99,7 +95,6 @@ val metas: List<Meta> = listOf(
         ground(size.height * 0.95f)
     },
 
-    // 1 · Rampa con masa colgante
     Meta("📐", "Fricción", BLUE, "Bloque M en la rampa, masa m colgante. Si m está fuera del rango de reposo, el sistema se mueve.") { p, t ->
         val M = p["M"]!!; val th = p["th"]!!; val ms = p["mus"]!!; val mk = p["muk"]!!; val m = p["m"]!!
         val s = Math.toRadians(th)
@@ -123,7 +118,6 @@ val metas: List<Meta> = listOf(
         box(Offset(rx, my + sm), sm, sm, ORANGE)
     },
 
-    // 2 · Bloques superpuestos
     Meta("🧱", "Fricción", ORANGE, "Naranja = B (se empuja con F) · Azul = A. Si F supera la fricción máxima, A se queda atrás.") { p, t ->
         val mA = p["mA"]!!; val mB = p["mB"]!!; val ms = p["mus"]!!; val mk = p["muk"]!!; val f = p["F"]!!
         val slip = f > ms * G * (mA + mB)
@@ -141,7 +135,6 @@ val metas: List<Meta> = listOf(
         arrow(Offset(x0 + xb - size.width * 0.14f, gy - bh / 2), Offset(x0 + xb, gy - bh / 2), RED)
     },
 
-    // 3 · Polipasto
     Meta("🏗️", "Poleas", ORANGE, "Cada ramal sostiene parte de la carga. El cabo libre se mueve n veces más que la carga.") { p, t ->
         val n = p["n"]!!.toInt().coerceIn(1, 8); val a = p["a"]!!; val h = p["h"]!!
         val y = (if (a > 0.05) min(0.5 * a * t * t, h) else min(0.4 * t, h)).toFloat()
@@ -162,7 +155,6 @@ val metas: List<Meta> = listOf(
         arrow(Offset(ex, hy), Offset(ex, hy + size.height * 0.1f), RED)
     },
 
-    // 4 · Hooke y M.A.S.
     Meta("🌀", "Hooke", GREEN, "Masa oscilando en cámara lenta. Línea verde = equilibrio (x = mg/k). A la derecha: posición vs. tiempo.") { p, t ->
         val m = p["m"]!!; val k = p["k"]!!; val l0 = p["L0"]!!
         val w = sqrt(k / m); val ts = t * 0.35
@@ -187,12 +179,11 @@ val metas: List<Meta> = listOf(
         drawPath(path, RED, style = Stroke(4f))
     },
 
-    // 5 · Resortes en serie en ascensor
     Meta("🛗", "Hooke", GREEN, "La cabina queda fija: solo se estiran los resortes. Línea verde = posición de la masa con el ascensor en reposo; al acelerar hacia arriba la masa baja más (F = m(g+a)).") { p, t ->
         val m = p["m"]!!; val k1 = p["k1"]!!; val k2 = p["k2"]!!; val a = p["a"]!!
         val fStatic = m * G
         val fFinal = m * (G + a)
-        // La fuerza en los resortes oscila (amortiguada) desde m·g hasta m(g+a)
+
         val fNow = fFinal + (fStatic - fFinal) * exp(-0.7 * t) * cos(3.2 * t)
         val inv = 1.0 / k1 + 1.0 / k2
         val h = size.height
@@ -201,22 +192,21 @@ val metas: List<Meta> = listOf(
         val e1 = (fNow / k1).toFloat() * pxm; val e2 = (fNow / k2).toFloat() * pxm
         val bx = size.width * 0.3f; val bw = size.width * 0.4f; val cx = bx + bw / 2
         val top = h * 0.07f; val bh = h * 0.87f
-        // cabina fija con su cable
+
         ln(Offset(cx, 0f), Offset(cx, top), INK, 5f)
         drawRect(INK, Offset(bx, top), Size(bw, bh), style = Stroke(5f))
-        // resortes
+
         val n1 = top + nat + e1; val n2 = n1 + nat + e2
         spring(Offset(cx, top), Offset(cx, n1), 6, 10f); drawCircle(INK, 6f, Offset(cx, n1))
         spring(Offset(cx, n1), Offset(cx, n2), 6, 10f)
         val bs = sz(m) * 0.9f
-        // línea de referencia: posición de la masa con el ascensor en reposo
+
         val yRef = top + 2 * nat + (fStatic * inv).toFloat() * pxm
         ln(Offset(bx + 6f, yRef), Offset(bx + bw - 6f, yRef), GREEN, 2f)
         box(Offset(cx, n2 + bs), bs, bs, BLUE)
         if (a > 0) arrow(Offset(bx + bw + 30f, top + bh * 0.55f), Offset(bx + bw + 30f, top + bh * 0.2f), RED)
     },
 
-    // 6 · Rampa con rozamiento (prob. 19 y 69)
     Meta("⛰️", "Energía", RED, "El bloque sube hasta detenerse (punto rojo) y vuelve a bajar. Con μk = 0 no se pierde energía.") { p, t ->
         val v0 = p["v0"]!!; val th = p["th"]!!; val mu = p["muk"]!!
         val s = Math.toRadians(th)
@@ -234,7 +224,6 @@ val metas: List<Meta> = listOf(
         onSlope(sl, sl.len * 0.1f + max(dist, 0.0).toFloat() * pxm, w, BLUE)
     },
 
-    // 7 · Rampa curva lisa + superficie rugosa (prob. 47)
     Meta("🛝", "Energía", RED, "Cae por la curva lisa (Ep → Ec) y luego frena por el rozamiento hasta detenerse (bandera).") { p, t ->
         val h = p["h"]!!; val d = p["d"]!!
         val fl = size.height * 0.85f; val rr = size.height * 0.5f; val x0 = size.width * 0.06f
@@ -267,7 +256,6 @@ val metas: List<Meta> = listOf(
         }
     },
 
-    // 8 · Dos bloques con fricción (prob. 49)
     Meta("🔗", "Energía", RED, "Azul = m1 sobre la plataforma (con fricción) · Naranja = m2 que cae. Se detiene al caer y metros.") { p, t ->
         val m1 = p["m1"]!!; val m2 = p["m2"]!!; val mk = p["muk"]!!; val yMax = max(p["y"]!!, 0.1)
         val a = max(0.0, (m2 - mk * m1) * G / (m1 + m2))
@@ -287,7 +275,6 @@ val metas: List<Meta> = listOf(
         box(Offset(rx, my + sm), sm, sm, ORANGE)
     },
 
-    // 9 · Persecución MRU
     Meta("🚓", "Cinemática", BLUE, "Azul = perseguidor · Naranja = perseguido. El tiempo está comprimido para que la captura (línea roja) ocurra en ~4 s.") { p, t ->
         val v1 = p["v1"]!!; val v2 = p["v2"]!!; val d0 = p["d0"]!!
         val tc = if (v1 > v2) d0 / (v1 - v2) else 10.0

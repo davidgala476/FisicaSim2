@@ -23,7 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Formas teal decorativas (esquina superior derecha e inferior izquierda). */
 @Composable
 fun Decorations() {
     Canvas(Modifier.fillMaxSize()) {

@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.viewinterop.AndroidView
 
-/** Reproductor de YouTube dentro de la app (WebView con el iframe oficial). Requiere permiso INTERNET. */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun YouTubeVideo(videoId: String, modifier: Modifier = Modifier) {

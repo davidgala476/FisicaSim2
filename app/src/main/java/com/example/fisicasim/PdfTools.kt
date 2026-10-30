@@ -37,7 +37,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.roundToInt
 
-/** Un PDF guardado en assets/pdfs. `fileName` es el nombre con el que se descarga. */
 data class PdfFile(val title: String, val asset: String, val fileName: String)
 
 object Pdfs {
@@ -61,7 +60,6 @@ object Pdfs {
 
 fun allPdfs(): List<PdfFile> = (topics.flatMap { it.pdfs } + workshops.map { it.pdf }).distinctBy { it.asset }
 
-/** Copia el PDF a la carpeta Descargas del teléfono. */
 fun downloadPdf(context: Context, pdf: PdfFile) {
     val app = context.applicationContext
     Thread {
@@ -92,7 +90,6 @@ fun downloadPdf(context: Context, pdf: PdfFile) {
     }.start()
 }
 
-/** Abre un PDF de assets con PdfRenderer (sin librerías externas). */
 class PdfSession(context: Context, asset: String) {
     private val file = File(context.cacheDir, "pdf_" + asset.substringAfterLast('/'))
     private val pfd: ParcelFileDescriptor
@@ -210,7 +207,6 @@ fun PdfPageView(session: PdfSession, index: Int) {
     }
 }
 
-/** Tarjeta con los PDF de un tema: botones Ver (dentro de la app) y Descargar. */
 @Composable
 fun MaterialCard(pdfs: List<PdfFile>, onView: (PdfFile) -> Unit, title: String = "Material para descargar") {
     val ctx = LocalContext.current

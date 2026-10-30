@@ -204,7 +204,7 @@ fun ExerciseScreen(idx: Int) {
         Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(top = 4.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Encabezado del ejercicio
+
         AppCard {
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -224,7 +224,6 @@ fun ExerciseScreen(idx: Int) {
             }
         }
 
-        // Simulación
         AppCard {
             Column(Modifier.padding(12.dp)) {
                 Canvas(Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(16.dp)).background(AppBg)) {
@@ -247,7 +246,6 @@ fun ExerciseScreen(idx: Int) {
             }
         }
 
-        // Valores
         AppCard {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SectionTitle("Valores")
@@ -284,7 +282,6 @@ fun ExerciseScreen(idx: Int) {
             }
         }
 
-        // Resultados
         AppCard {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SectionTitle("Resultados")
@@ -305,7 +302,6 @@ fun ExerciseScreen(idx: Int) {
             }
         }
 
-        // Enunciado, apartados y fórmulas
         InfoSectionCard("Enunciado", ex.statement)
         info?.sections?.forEach { InfoSectionCard(it.title, it.text) }
         if (info != null && info.formulas.isNotEmpty()) FormulasCard(info.formulas)

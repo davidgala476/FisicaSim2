@@ -1,13 +1,11 @@
 package com.example.fisicasim
 
-/** Un apartado explicativo (título + texto). */
 data class InfoSection(val title: String, val text: String)
 
-/** Información que se muestra DENTRO de cada simulador (mismo orden que `exercises`). */
 data class ExerciseInfo(val description: String, val sections: List<InfoSection>, val formulas: List<String>)
 
 val exerciseInfos: List<ExerciseInfo> = listOf(
-    // 0 · Atwood
+
     ExerciseInfo(
         "Dos masas cuelgan de los extremos de una cuerda que pasa por una polea ideal (sin masa ni rozamiento). La masa mayor baja y la menor sube con la misma aceleración.",
         listOf(
@@ -16,7 +14,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
         ),
         listOf("a = (m2 − m1)·g / (m1 + m2)", "T = 2·m1·m2·g / (m1 + m2)", "g = 9,8 m/s²")
     ),
-    // 1 · Rampa con masa colgante
+
     ExerciseInfo(
         "Un bloque M sobre un plano inclinado con fricción está unido, por una cuerda y una polea, a una masa m que cuelga. Según el valor de m, el sistema se queda quieto o se mueve.",
         listOf(
@@ -30,7 +28,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "m sube: a = (M·g·senθ − m·g − μk·M·g·cosθ)/(M + m)\nT = m(g + a)"
         )
     ),
-    // 2 · Bloques superpuestos
+
     ExerciseInfo(
         "El bloque A está sobre el bloque B y B se apoya en una mesa lisa. Se empuja B con una fuerza F y solo hay fricción entre A y B.",
         listOf(
@@ -43,7 +41,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "Deslizan: fk = μk·mA·g\naA = fk / mA\naB = (F − fk) / mB"
         )
     ),
-    // 3 · Polipasto
+
     ExerciseInfo(
         "Sistema de poleas con n ramales de cuerda que sostienen la carga. Permite levantar pesos grandes con una fuerza menor, a cambio de recoger más cuerda.",
         listOf(
@@ -58,7 +56,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "M = carga + bloque móvil"
         )
     ),
-    // 4 · Hooke y MAS
+
     ExerciseInfo(
         "Una masa colgada de un resorte lo estira hasta quedar en equilibrio. Si se la suelta desde otra posición, oscila con movimiento armónico simple.",
         listOf(
@@ -66,7 +64,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
         ),
         listOf("x = m·g / k", "L final = L0 + x", "ω = √(k/m)", "T = 2π / ω", "f = 1 / T")
     ),
-    // 5 · Resortes en serie en ascensor
+
     ExerciseInfo(
         "Dos resortes unidos en serie sostienen una masa dentro de un ascensor que acelera hacia arriba, por lo que se estiran más que en reposo.",
         listOf(
@@ -74,7 +72,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
         ),
         listOf("F = m(g + a)", "1/keq = 1/k1 + 1/k2\nkeq = k1·k2 / (k1 + k2)", "x1 = F / k1\nx2 = F / k2")
     ),
-    // 6 · Rampa con rozamiento
+
     ExerciseInfo(
         "Un bloque es lanzado hacia arriba por una rampa y se detiene tras recorrer cierta distancia. Con μk = 0 la energía mecánica se conserva; con fricción, parte se disipa.",
         listOf(
@@ -88,7 +86,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "v al volver = √(2g(senθ − μk·cosθ)·d)"
         )
     ),
-    // 7 · Rampa curva + superficie rugosa
+
     ExerciseInfo(
         "Un bloque parte del reposo a una altura h, baja por una curva lisa y luego se frena sobre una superficie rugosa horizontal hasta detenerse.",
         listOf(
@@ -96,7 +94,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
         ),
         listOf("v = √(2·g·h)", "E disipada = m·g·h", "μk·m·g·d = m·g·h\nμk = h / d")
     ),
-    // 8 · Dos bloques con fricción
+
     ExerciseInfo(
         "Un bloque m1 sobre una plataforma con fricción está unido por una cuerda a un bloque m2 que cuelga y cae una distancia y.",
         listOf(
@@ -108,7 +106,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "½(m1 + m2)·v² = (m2 − μk·m1)·g·y"
         )
     ),
-    // 9 · Persecución
+
     ExerciseInfo(
         "Un perseguidor sale detrás de otro objeto que ya lleva una ventaja de d0 metros. Ambos se mueven con velocidad constante (MRU).",
         listOf(
