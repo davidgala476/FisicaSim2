@@ -188,20 +188,32 @@ val metas: List<Meta> = listOf(
     },
 
     // 5 · Resortes en serie en ascensor
-    Meta("🛗", "Hooke", GREEN, "El ascensor acelera hacia arriba: ambos resortes soportan F = m(g+a) y se alargan más.") { p, t ->
+    Meta("🛗", "Hooke", GREEN, "La cabina queda fija: solo se estiran los resortes. Línea verde = posición de la masa con el ascensor en reposo; al acelerar hacia arriba la masa baja más (F = m(g+a)).") { p, t ->
         val m = p["m"]!!; val k1 = p["k1"]!!; val k2 = p["k2"]!!; val a = p["a"]!!
-        val f = m * (G + a)
-        val nat = size.height * 0.1f
-        val e1 = (f / k1 * size.height * 0.5f).toFloat(); val e2 = (f / k2 * size.height * 0.5f).toFloat()
-        val up = ((0.5 * a * t * t).toFloat() * size.height * 0.08f) % (size.height * 0.25f)
+        val fStatic = m * G
+        val fFinal = m * (G + a)
+        // La fuerza en los resortes oscila (amortiguada) desde m·g hasta m(g+a)
+        val fNow = fFinal + (fStatic - fFinal) * exp(-0.7 * t) * cos(3.2 * t)
+        val inv = 1.0 / k1 + 1.0 / k2
+        val h = size.height
+        val pxm = min(h * 0.9, h * 0.2 / (max(fStatic, fFinal) * inv * 1.25)).toFloat()
+        val nat = h * 0.1f
+        val e1 = (fNow / k1).toFloat() * pxm; val e2 = (fNow / k2).toFloat() * pxm
         val bx = size.width * 0.3f; val bw = size.width * 0.4f; val cx = bx + bw / 2
-        val top = size.height * 0.37f - up; val bh = size.height * 0.58f
+        val top = h * 0.07f; val bh = h * 0.87f
+        // cabina fija con su cable
+        ln(Offset(cx, 0f), Offset(cx, top), INK, 5f)
         drawRect(INK, Offset(bx, top), Size(bw, bh), style = Stroke(5f))
+        // resortes
         val n1 = top + nat + e1; val n2 = n1 + nat + e2
         spring(Offset(cx, top), Offset(cx, n1), 6, 10f); drawCircle(INK, 6f, Offset(cx, n1))
         spring(Offset(cx, n1), Offset(cx, n2), 6, 10f)
-        box(Offset(cx, n2 + sz(m) * 0.9f), sz(m) * 0.9f, sz(m) * 0.9f, BLUE)
-        if (a > 0) arrow(Offset(bx + bw + 30f, top + bh * 0.5f), Offset(bx + bw + 30f, top + bh * 0.2f), RED)
+        val bs = sz(m) * 0.9f
+        // línea de referencia: posición de la masa con el ascensor en reposo
+        val yRef = top + 2 * nat + (fStatic * inv).toFloat() * pxm
+        ln(Offset(bx + 6f, yRef), Offset(bx + bw - 6f, yRef), GREEN, 2f)
+        box(Offset(cx, n2 + bs), bs, bs, BLUE)
+        if (a > 0) arrow(Offset(bx + bw + 30f, top + bh * 0.55f), Offset(bx + bw + 30f, top + bh * 0.2f), RED)
     },
 
     // 6 · Rampa con rozamiento (prob. 19 y 69)
@@ -275,33 +287,7 @@ val metas: List<Meta> = listOf(
         box(Offset(rx, my + sm), sm, sm, ORANGE)
     },
 
-    // 9 · Curva peraltada
-    Meta("🏎️", "Circular", ORANGE, "Izquierda: vista superior del auto a v máx. Derecha: vista lateral con mg (rojo), N (verde) y fuerza centrípeta (naranja).") { p, t ->
-        val r = p["r"]!!; val th = p["th"]!!; val ms = p["mus"]!!
-        val s = Math.toRadians(th)
-        val den = cos(s) - ms * sin(s)
-        val v = if (den > 0) sqrt(r * G * (sin(s) + ms * cos(s)) / den) else 20.0
-        val c = Offset(size.width * 0.27f, size.height * 0.5f); val rr = size.height * 0.38f
-        drawCircle(GREY, rr, c, style = Stroke(28f))
-        val ang = (v / r * t * 2.5).toFloat()
-        val car = Offset(c.x + rr * cos(ang), c.y + rr * sin(ang))
-        rotate(Math.toDegrees(ang.toDouble()).toFloat() + 180f, car) {
-            drawRect(BLUE, Offset(car.x - 10f, car.y - 18f), Size(20f, 36f))
-        }
-        arrow(car, Offset(car.x + (c.x - car.x) * 0.35f, car.y + (c.y - car.y) * 0.35f), ORANGE)
-        val l = size.width * 0.2f
-        val p0 = Offset(size.width * 0.58f, size.height * 0.8f)
-        val p1 = Offset(p0.x + 2 * l * cos(s).toFloat(), p0.y - 2 * l * sin(s).toFloat())
-        ln(p0, p1, INK, 6f)
-        val mid = Offset((p0.x + p1.x) / 2, (p0.y + p1.y) / 2)
-        rotate(-th.toFloat(), mid) { drawRect(BLUE, Offset(mid.x - 28f, mid.y - 24f), Size(56f, 24f)) }
-        val cc = Offset(mid.x - 12f * sin(s).toFloat(), mid.y - (12f * cos(s).toFloat()))
-        arrow(cc, Offset(cc.x, cc.y + 55f), RED)
-        arrow(cc, Offset(cc.x - 65f * sin(s).toFloat(), cc.y - 65f * cos(s).toFloat()), GREEN)
-        arrow(cc, Offset(cc.x - 60f, cc.y), ORANGE)
-    },
-
-    // 10 · Persecución MRU
+    // 9 · Persecución MRU
     Meta("🚓", "Cinemática", BLUE, "Azul = perseguidor · Naranja = perseguido. El tiempo está comprimido para que la captura (línea roja) ocurra en ~4 s.") { p, t ->
         val v1 = p["v1"]!!; val v2 = p["v2"]!!; val d0 = p["d0"]!!
         val tc = if (v1 > v2) d0 / (v1 - v2) else 10.0

@@ -178,19 +178,6 @@ val exercises = listOf(
         )
     },
     Exercise(
-        "Curva peraltada",
-        "v máx = √( r·g·(sinθ + μs·cosθ) / (cosθ − μs·sinθ) ).",
-        listOf(Param("r", "Radio", "m", 50.0), Param("th", "Ángulo", "°", 15.0), Param("mus", "μs", "", 0.5))
-    ) { p ->
-        val r = p["r"]!!; val t = rad(p["th"]!!); val ms = p["mus"]!!
-        val den = cos(t) - ms * sin(t)
-        listOf(
-            Result("v máxima", if (den > 0) fmt(sqrt(r * G * (sin(t) + ms * cos(t)) / den)) + " m/s" else "sin límite (no desliza)"),
-            Result("Sin fricción", fmt(sqrt(r * G * tan(t))) + " m/s"),
-            Result("Calzada plana", fmt(sqrt(r * G * ms)) + " m/s")
-        )
-    },
-    Exercise(
         "Persecución (MRU)",
         "El perseguidor parte a d0 metros detrás. Igualando tiempos: t = d0/(v1−v2).",
         listOf(Param("v1", "Velocidad perseguidor", "m/s", 12.0), Param("v2", "Velocidad perseguido", "m/s", 10.0), Param("d0", "Ventaja inicial", "m", 20.0))

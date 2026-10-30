@@ -4,7 +4,8 @@ data class Topic(
     val title: String,
     val description: String,
     val sections: List<InfoSection>,
-    val formulas: List<String>
+    val formulas: List<String>,
+    val videoId: String? = null
 )
 
 val topics = listOf(
@@ -16,7 +17,8 @@ val topics = listOf(
             InfoSection("2ª ley", "La fuerza neta y la aceleración tienen la misma dirección (es una ecuación vectorial). En general, F = dp/dt."),
             InfoSection("3ª ley (acción y reacción)", "A toda acción corresponde una reacción igual y opuesta, aplicadas a cuerpos distintos.")
         ),
-        listOf("ΣF = 0  →  a = 0", "ΣF = m·a", "W = m·g   (g = 9,8 m/s²)")
+        listOf("ΣF = 0  →  a = 0", "ΣF = m·a", "W = m·g   (g = 9,8 m/s²)"),
+        "DAtcTgJB66s"
     ),
     Topic(
         "Diagrama de cuerpo libre (DCL)",

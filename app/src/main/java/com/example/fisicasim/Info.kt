@@ -108,22 +108,7 @@ val exerciseInfos: List<ExerciseInfo> = listOf(
             "½(m1 + m2)·v² = (m2 − μk·m1)·g·y"
         )
     ),
-    // 9 · Curva peraltada
-    ExerciseInfo(
-        "Un auto toma una curva circular con la calzada inclinada (peralte). La fricción estática y la componente de la normal aportan la fuerza centrípeta.",
-        listOf(
-            InfoSection("Idea clave", "Se descomponen las fuerzas en horizontal (hacia el centro de la curva) y vertical (equilibrio). De ahí sale la velocidad máxima sin derrapar."),
-            InfoSection("Casos particulares", "Sin fricción, el peralte fija una velocidad ideal. En calzada plana, la fricción es la única fuerza centrípeta.")
-        ),
-        listOf(
-            "N·senθ + μs·N·cosθ = m·v²/r",
-            "N·cosθ − μs·N·senθ = m·g",
-            "v máx = √( r·g(senθ + μs·cosθ) / (cosθ − μs·senθ) )",
-            "Sin fricción: v = √(r·g·tanθ)",
-            "Calzada plana: v = √(r·g·μs)"
-        )
-    ),
-    // 10 · Persecución
+    // 9 · Persecución
     ExerciseInfo(
         "Un perseguidor sale detrás de otro objeto que ya lleva una ventaja de d0 metros. Ambos se mueven con velocidad constante (MRU).",
         listOf(

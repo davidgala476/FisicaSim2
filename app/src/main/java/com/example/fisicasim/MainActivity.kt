@@ -335,6 +335,7 @@ fun TopicScreen(idx: Int) {
                 Text(tp.description, fontSize = 14.sp, color = Ink, lineHeight = 20.sp)
             }
         }
+        tp.videoId?.let { VideoCard(it) }
         tp.sections.forEach { InfoSectionCard(it.title, it.text) }
         if (tp.formulas.isNotEmpty()) FormulasCard(tp.formulas)
     }
